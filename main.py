@@ -157,3 +157,14 @@ for word in word_list:
     print(f"⭐ Puntaje actual: {score}\n")
 
 print(f"🏁 YOUR SCORE: {score}")
+
+total = score + errors
+if total > 0:
+    accuracy = (score/total)*100
+
+    if accuracy >= 80:
+        print("🏆 Excelente desempeño!")
+    elif accuracy >= 50:
+        print("👍 Buen trabajo!")
+    else:
+        print("📚 Sigue practicando!")
