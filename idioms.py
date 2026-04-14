@@ -6,21 +6,20 @@ from googletrans import Translator
 import random
 import unicodedata
 
-# ------------------ NUEVA FUNCIÓN ------------------
+# ------------------ FUNCIÓN ------------------
 def normalize(text):
     text = text.lower().strip()
     return ''.join(
         c for c in unicodedata.normalize('NFD', text)
         if unicodedata.category(c) != 'Mn'
     )
-# --------------------------------------------------
+# --------------------------------------------
 
-duration = 5  # segundos de grabación
+duration = 5
 sample_rate = 44100
 max_errors = 3
 score = 0
 errors = 0
-
 
 words = {
     "easy": ["gato", "perro", "manzana", "leche", "sol"],
@@ -39,11 +38,9 @@ idioms = {
 }
 
 idiom = input("Choose the language you want to learn today: Inglés, Ruso, Portugués, Indonesio, Polaco, Italiano, Turco. ").strip().lower()
-
 level = input("Choose a difficulty level: Easy, Medium or Hard. ").strip().lower()
 
-# ------------------ MEJORAS ------------------
-
+# VALIDACIONES
 if level not in words:
     print("Nivel inválido, se usará 'easy' por defecto")
     level = "easy"
@@ -59,18 +56,12 @@ print(f"Idioma seleccionado: {idiom}")
 print(f"Dificultad: {level}")
 print("Tienes 3 vidas ❤️❤️❤️\n")
 
-# ------------------------------------------------------
-
 word_list = words[level]
 random.shuffle(word_list)
 
 translator = Translator()
 recognizer = sr.Recognizer()
 
-# ❗ TU LÍNEA ORIGINAL (se respeta)
-# for word in word_list():
-
-# ✅ CORRECCIÓN FUNCIONAL
 for word in word_list:
 
     print(f"Palabra: {word}")
@@ -94,47 +85,28 @@ for word in word_list:
             text = recognizer.recognize_google(audio, language="es").lower()
             print("Dijiste:", text)
 
-            # ❗ TU LÍNEA ORIGINAL (controlada)
-            try:
-                translated = translator.translate(text, dest=idioms).text.lower()
-            except:
-                translated = translator.translate(text, dest=selected_language).text.lower()
+            # Traducción correcta esperada
+            correct_translation = translator.translate(
+                word, src="es", dest=selected_language
+            ).text.lower()
 
-            # ------------------ MEJORA CLAVE ------------------
-
-            # Traducción correcta (forzando español → idioma objetivo)
-            correct_translation = translator.translate(word, src="es", dest=selected_language).text.lower()
             print(f"Traducción correcta esperada: {correct_translation}")
 
-            # NORMALIZACIÓN
+            # ------------------ LÓGICA CORREGIDA ------------------
+
             normalized_text = normalize(text)
             normalized_correct = normalize(correct_translation)
 
-            # CONTROL DE RESPUESTA
-            is_correct = False
-
-            # ❗ TU LÓGICA ORIGINAL (se mantiene)
-            if text == translated:
-                print("¡CORRECTO!")
-                is_correct = True
-            else:
-                print("MUY MAL... INTENTA DE NUEVO")
-
-            # ✅ NUEVA LÓGICA CORRECTA
             if normalized_correct in normalized_text:
                 print("✅ ¡CORRECTO!")
-                is_correct = True
-            else:
-                print("❌ Incorrecto")
-
-            # ✅ SOLO SE SUMA UNA VEZ
-            if is_correct:
                 score += 1
             else:
+                print("❌ Incorrecto")
                 errors += 1
 
-            # -------------------------------------------------
+            # -----------------------------------------------------
 
+            # CONTROL DE VIDAS
             if errors >= max_errors:
                 print("💀 GAME OVER")
                 break
@@ -142,7 +114,7 @@ for word in word_list:
     except sr.UnknownValueError:
         print("No se pudo reconocer el habla.")
         errors += 1
-        print("MUY MAL... INTENTA DE NUEVO")
+        print("❌ Cuenta como error")
 
         if errors >= max_errors:
             print("💀 GAME OVER")
@@ -153,7 +125,21 @@ for word in word_list:
         break
 
     # FEEDBACK
-    print(f"❤️ Vidas restantes: {max_errors - errors}")
+    lives = max_errors - errors
+    print(f"❤️ Vidas restantes: {lives}")
     print(f"⭐ Puntaje actual: {score}\n")
+
+print(f"🏁 YOUR SCORE: {score}")
+
+total = score + errors
+if total > 0:
+    accuracy = (score / total) * 100
+
+    if accuracy >= 80:
+        print("🏆 Excelente desempeño!")
+    elif accuracy >= 50:
+        print("👍 Buen trabajo!")
+    else:
+        print("📚 Sigue practicando!")
 
 print(f"🏁 YOUR SCORE: {score}")
